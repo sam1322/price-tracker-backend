@@ -1,6 +1,6 @@
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback, Profile } from 'passport-google-oauth20';
-import { Injectable } from '@nestjs/common';
+import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
 
 @Injectable()
@@ -10,9 +10,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
       callbackURL: process.env.GOOGLE_CALLBACK_URL as string,
-    //   callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/auth/google/callback',
+      //   callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/auth/google/callback',
       scope: ['email', 'profile'],
-      passReqToCallback: true, // Add if you need the request object
+      // passReqToCallback: true, // Add if you need the request object
     });
   }
 
@@ -23,13 +23,19 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     try {
-    //   const user = await this.authService.findOrCreateUser(
-    //     { ...profile, accessToken, refreshToken },
-    //     'google'
-    //   );
-    //   done(null, user);
+      const user = await this.authService.findOrCreateUser(
+        { ...profile, accessToken, refreshToken },
+        'google'
+      );
+      if (!user) {
+        throw new UnauthorizedException('Could not process user from provider.');
+      }
+
+      return user; // ✅ On success, return the user
     } catch (err) {
-    //   done(err, null);
+      // ❌ On failure, throw an exception
+      console.log("error", err)
+      throw new UnauthorizedException('Failed to validate user.', err.message);
     }
   }
 }
