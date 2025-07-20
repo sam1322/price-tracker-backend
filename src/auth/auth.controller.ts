@@ -4,6 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { Response } from 'express'; // Import Response from express
 import { CreateUserDto } from './dto/create-user.dto';
+import { JwtAuthGuard } from './jwt-authguard';
 
 @Controller('auth')
 export class AuthController {
@@ -67,7 +68,8 @@ export class AuthController {
   }
 
   // A protected route to check the user's session from the frontend
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
