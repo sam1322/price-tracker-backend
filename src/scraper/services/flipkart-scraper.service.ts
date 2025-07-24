@@ -10,7 +10,7 @@ export class FlipkartScraperService {
 
     constructor(private browserService: BrowserService) { }
 
-    async search(query: string, limit: number = 10): Promise<ScraperResult> {
+    async search(query: string, limit: number = 100): Promise<ScraperResult> {
         const browser = this.browserService.getBrowser();
         const context = await browser.newContext({
             userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -22,17 +22,20 @@ export class FlipkartScraperService {
             await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
 
             // Handle login popup if it appears
-            // try {
-            //     await page.click('._2KpZ6l._2doB4z', { timeout: 3000 });
-            // } catch (e) {
-            //     // Login popup might not appear
-            // }
+            try {
+                await page.click('._2KpZ6l._2doB4z', { timeout: 3000 });
+            } catch (e) {
+                // Login popup might not appear
+            }
 
             // Wait for products to load
             await page.waitForSelector('._75nlfW', { timeout: 10000 });
 
             const products = await this.extractProducts(page, limit);
+            this.logger.log("flipkart products recieved", products.length)
 
+            await page.screenshot({ path: `success-flipkart-${Date.now()}.png` });
+            this.logger.debug(`Flikpart scraping success. A screenshot was saved.`);
             return {
                 success: true,
                 products,
@@ -90,7 +93,7 @@ export class FlipkartScraperService {
 
                 const getOriginalPrice = (): number => {
                     const originalPriceText = getTextContent('.yRaY8j.A6\\+E6v');
-                    console.log(originalPriceText,"originalPrice")
+                    console.log(originalPriceText, "originalPrice")
                     if (originalPriceText) {
                         const price = parseFloat(originalPriceText.replace(/[^0-9]/g, ''));
                         return isNaN(price) ? 0 : price;
@@ -137,16 +140,21 @@ export class FlipkartScraperService {
         return page.evaluate((limit) => {
             const products: any[] = [];
             const items = document.querySelectorAll('._75nlfW');
+            console.log("flipkart products  length", items.length)
 
             for (let i = 0; i < Math.min(items.length, limit); i++) {
                 const item = items[i];
 
-                const titleElement = item.querySelector('.wjcEIp');
+                const titleElement = item.querySelector('.wjcEIp') ?? item.querySelector('.KzDlHZ');
                 const priceElement = item.querySelector('.Nx9bqj');
                 const originalPriceElement = item.querySelector('.yRaY8j');
                 const imageElement = item.querySelector('.DByuf4');
-                const linkElement = item.querySelector('.wjcEIp');
+                const linkElement = item.querySelector('.wjcEIp') ?? item.querySelector('.CGtC98');
                 const ratingElement = item.querySelector('.XQDdHH');
+                const reviewCountElement = item.querySelector('.Wphh3N > span > span:first-child');
+
+
+                // const reviewCount = item.querySelector('') 
 
                 if (titleElement && linkElement) {
                     const price = priceElement ?
@@ -158,6 +166,12 @@ export class FlipkartScraperService {
                     const rating = ratingElement ?
                         parseFloat(ratingElement.textContent || '0') : 0;
 
+
+                    const reviewCount = reviewCountElement ?
+                        parseFloat(reviewCountElement.textContent?.trim().replace(/,/g, '').match(/\d+/)?.[0] || '0') : 0;
+
+                    // console.log('reviewCount',reviewCount,reviewCountElement?.textContent)
+
                     const href = linkElement.getAttribute('href');
                     const productUrl = href?.startsWith('http') ? href : 'https://www.flipkart.com' + href;
 
@@ -165,8 +179,10 @@ export class FlipkartScraperService {
                     const urlMatch = href?.match(/pid=([^&]+)/);
                     const flipkartId = urlMatch ? urlMatch[1] : '';
 
+                    const titleName = titleElement?.getAttribute('title') ?? titleElement?.textContent ?? ""
+
                     products.push({
-                        title: titleElement?.getAttribute('title')?.trim() || '',
+                        title: titleName.trim(),
                         price,
                         originalPrice,
                         currency: 'INR',
@@ -175,6 +191,7 @@ export class FlipkartScraperService {
                         vendor: 'FLIPKART',
                         availability: true, // TODO: doubtfull
                         rating,
+                        reviewCount,
                         flipkartId,
                     });
                 }

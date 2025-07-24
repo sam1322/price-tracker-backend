@@ -10,7 +10,7 @@ export class AmazonScraperService {
 
   constructor(private browserService: BrowserService) { }
 
-  async search(query: string, limit: number = 10): Promise<ScraperResult> {
+  async search(query: string, limit: number = 100): Promise<ScraperResult> {
     const browser = this.browserService.getBrowser();
     const context = await browser.newContext({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -25,7 +25,7 @@ export class AmazonScraperService {
       await page.waitForSelector('[data-component-type="s-search-result"]', { timeout: 10000 });
 
       const products = await this.extractProducts(page, limit);
-      this.logger.log("recieved", products.length)
+      this.logger.log("amazon products recieved", products.length)
 
       await page.screenshot({ path: `success-amazon-${Date.now()}.png` });
       this.logger.debug(`Amazon scraping success. A screenshot was saved.`);
@@ -80,7 +80,7 @@ export class AmazonScraperService {
             '#priceblock_dealprice',
             '#priceblock_ourprice',
           ];
-          
+
 
           for (const selector of priceSelectors) {
             const priceText = getTextContent(selector);
@@ -153,14 +153,17 @@ export class AmazonScraperService {
       for (let i = 0; i < Math.min(items.length, limit); i++) {
         const item = items[i];
         const titleSelector = 'div[data-cy="title-recipe"] h2.a-text-normal';
-        const linkSelector = 'div[data-cy="title-recipe"] a';
+        const linkSelector = 'div[data-cy="title-recipe"] > .a-link-normal';
 
         const titleElement = item?.querySelector(titleSelector)?.getAttribute("aria-label");
         const priceElement = item.querySelector('.a-price-whole');
+        const originalPriceElement = item.querySelector('.a-price.a-text-price .a-offscreen')
+
         const priceSymbol = item.querySelector('.a-price-symbol')?.textContent?.trim();
         const imageElement = item.querySelector('img.s-image')?.getAttribute('src') || "";
         const linkElement = item.querySelector(linkSelector);
         const ratingElement = item.querySelector('.a-icon-star-small .a-icon-alt');
+        const reviewCountElement = item.querySelector('.a-link-normal.s-underline-text.s-underline-link-text.s-link-style');
         const asinElement = item
         // console.log('title', titleElement)
         // console.log('price', priceElement, priceSymbol)
@@ -173,18 +176,27 @@ export class AmazonScraperService {
           const price = priceElement ?
             parseFloat(priceElement.textContent?.replace(/[^0-9.]/g, '') || '0') : 0;
 
+          const originalPrice = originalPriceElement ?
+            parseFloat(originalPriceElement.textContent?.replace(/[^0-9.]/g, '') || '0') : 0;
+
           const rating = ratingElement ?
             parseFloat(ratingElement.textContent?.match(/(\d+\.?\d*)/)?.[1] || '0') : 0;
+          
+
+          const reviewCount = reviewCountElement ?
+            parseFloat(reviewCountElement.textContent?.match(/(\d+\.?\d*)/)?.[1] || '0') : 0;
 
           products.push({
             title: titleElement || '',
             price,
+            originalPrice,
             currency: priceSymbol === '₹' ? 'INR' : 'NA',
             imageUrl: imageElement,
             productUrl: 'https://www.amazon.in' + linkElement.getAttribute('href'),
             vendor: 'AMAZON',
             availability: true,
             rating,
+            reviewCount,
             asin: asinElement?.getAttribute('data-asin') || '',
           });
         }
