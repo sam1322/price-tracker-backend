@@ -27,7 +27,7 @@ export class AmazonScraperService {
       const products = await this.extractProducts(page, limit);
       this.logger.log("amazon products recieved", products.length)
 
-      await page.screenshot({ path: `success-amazon-${Date.now()}.png` });
+      // await page.screenshot({ path: `success-amazon-${Date.now()}.png` });
       this.logger.debug(`Amazon scraping success. A screenshot was saved.`);
 
       return {

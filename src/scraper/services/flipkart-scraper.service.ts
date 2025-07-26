@@ -34,7 +34,7 @@ export class FlipkartScraperService {
             const products = await this.extractProducts(page, limit);
             this.logger.log("flipkart products recieved", products.length)
 
-            await page.screenshot({ path: `success-flipkart-${Date.now()}.png` });
+            // await page.screenshot({ path: `success-flipkart-${Date.now()}.png` });
             this.logger.debug(`Flikpart scraping success. A screenshot was saved.`);
             return {
                 success: true,
