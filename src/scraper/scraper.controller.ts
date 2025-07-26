@@ -16,23 +16,27 @@ export class ScraperController {
     async searchAmazonProducts(@Body() body: {
         query: string, limit?: number
     }) {
-        return await this.amazonScraper.search(body.query, body.limit);
+        return "hello"
+        // return await this.amazonScraper.search(body.query, body.limit);
     }
 
 
     @Post("amazon/search/url")
     async searchAmazonProductsUrl(@Body() body: { url: string }) {
-        return await this.amazonScraper.scrapeProduct(body.url);
+        return "hello"
+        // return await this.amazonScraper.scrapeProduct(body.url);
     }
 
     @Post("flipkart/search")
     async searchFlipkartProducts(@Body() body: { query: string, limit?: number }) {
-        return await this.flipkartScraper.search(body.query, body.limit);
+        return "hello"
+        // return await this.flipkartScraper.search(body.query, body.limit);
     }
 
 
     @Post("flipkart/search/url")
     async searchFlipkartProductsUrl(@Body() body: { url: string }) {
-        return await this.flipkartScraper.scrapeProduct(body.url);
+        return "hello"
+        // return await this.flipkartScraper.scrapeProduct(body.url);
     }
 }

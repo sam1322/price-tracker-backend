@@ -8,17 +8,19 @@ generator client {
   // provider = "prisma-client-js"
   // output   = "../generated/prisma"
 
-  provider        = "prisma-client-js"
-  previewFeatures = ["queryCompiler", "driverAdapters"]
-  output          = "../generated/prisma"
-  
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/client"
+  // provider        = "prisma-client"
+  // output   = "../generated/prisma"
+
+  // previewFeatures = ["queryCompiler", "driverAdapters"]
+  // output          = "../src/generated/client"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 
 model User {
   id            String    @id @default(cuid())
@@ -54,75 +56,75 @@ model Account {
 // -------------------------------------- Product Scraper -----------------------------------------------------------------
 
 model Product {
-  id            String         @id @default(cuid())
-  title         String
-  imageUrl      String?
-  productUrl    String         @unique
-  vendor        Vendor
-  asin          String?        // Amazon Standard Identification Number
-  flipkartId    String?        // Flipkart product ID
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  priceHistory  PriceHistory[]
-  trackedItems  TrackedItem[]
-  
+  id           String         @id @default(cuid())
+  title        String
+  imageUrl     String?
+  productUrl   String         @unique
+  vendor       Vendor
+  asin         String? // Amazon Standard Identification Number
+  flipkartId   String? // Flipkart product ID
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  priceHistory PriceHistory[]
+  trackedItems TrackedItem[]
+
   @@index([vendor, asin])
   @@index([vendor, flipkartId])
 }
 
 model TrackedItem {
-  id            String         @id @default(cuid())
-  name          String         // User-friendly name for the tracked item
-  searchQuery   String         // Original search query
-  targetPrice   Decimal?       @db.Decimal(10, 2) // Alert when price drops below this
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  userId        String?        // For future user implementation
-  products      Product[]
-  alerts        PriceAlert[]
-  
+  id          String       @id @default(cuid())
+  name        String // User-friendly name for the tracked item
+  searchQuery String // Original search query
+  targetPrice Decimal?     @db.Decimal(10, 2) // Alert when price drops below this
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userId      String? // For future user implementation
+  products    Product[]
+  alerts      PriceAlert[]
+
   @@index([isActive])
 }
 
 model PriceHistory {
-  id            String         @id @default(cuid())
+  id            String   @id @default(cuid())
   productId     String
-  product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
-  price         Decimal        @db.Decimal(10, 2)
-  currency      String         @default("INR")
-  availability  Boolean        @default(true)
-  rating        Decimal?       @db.Decimal(3, 2)
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  price         Decimal  @db.Decimal(10, 2)
+  currency      String   @default("INR")
+  availability  Boolean  @default(true)
+  rating        Decimal? @db.Decimal(3, 2)
   reviewCount   Int?
-  discount      Int?           // Discount percentage
-  originalPrice Decimal?       @db.Decimal(10, 2)
-  scrapedAt     DateTime       @default(now())
-  
+  discount      Int? // Discount percentage
+  originalPrice Decimal? @db.Decimal(10, 2)
+  scrapedAt     DateTime @default(now())
+
   @@index([productId, scrapedAt])
 }
 
 model PriceAlert {
-  id            String         @id @default(cuid())
+  id            String      @id @default(cuid())
   trackedItemId String
-  trackedItem   TrackedItem    @relation(fields: [trackedItemId], references: [id], onDelete: Cascade)
+  trackedItem   TrackedItem @relation(fields: [trackedItemId], references: [id], onDelete: Cascade)
   message       String
-  priceChange   Decimal        @db.Decimal(10, 2)
-  oldPrice      Decimal        @db.Decimal(10, 2)
-  newPrice      Decimal        @db.Decimal(10, 2)
-  isRead        Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  
+  priceChange   Decimal     @db.Decimal(10, 2)
+  oldPrice      Decimal     @db.Decimal(10, 2)
+  newPrice      Decimal     @db.Decimal(10, 2)
+  isRead        Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+
   @@index([trackedItemId, isRead])
 }
 
 model ScrapeLog {
-  id            String         @id @default(cuid())
-  vendor        Vendor
-  status        ScrapeStatus
-  itemsScraped  Int            @default(0)
-  errorMessage  String?
-  duration      Int            // Duration in milliseconds
-  createdAt     DateTime       @default(now())
+  id           String       @id @default(cuid())
+  vendor       Vendor
+  status       ScrapeStatus
+  itemsScraped Int          @default(0)
+  errorMessage String?
+  duration     Int // Duration in milliseconds
+  createdAt    DateTime     @default(now())
 }
 
 enum Vendor {

@@ -3,8 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AmazonScraperService } from './services/amazon-scraper.service';
 import { FlipkartScraperService } from './services/flipkart-scraper.service';
 import { ProductData, ScraperResult, PriceComparison } from './interfaces/scraper.interface';
-// import { Prisma, Vendor } from 'generated/prisma';
-import { Prisma, Vendor } from '@prisma/client';
+// import { Prisma, Vendor } from 'src/generated/client';
+import { Vendor } from '@prisma/client';
 
 @Injectable()
 export class ScraperService {

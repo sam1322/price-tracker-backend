@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScraperService } from '../scraper/scraper.service';
 import { CreateTrackedItemDto } from './dto/tracker.dto';
-// import { Prisma } from '@prisma/client';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@prisma/client';
+// import { Prisma } from 'src/generated/client';
 import { PriceComparison, ScraperResult } from 'src/scraper/interfaces/scraper.interface';
 
 @Injectable()

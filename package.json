@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "start:dev:local": "dotenv -e .env.local nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -19,8 +20,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
+    "prisma:generate:local": "dotenv -e .env.local prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:local": "dotenv -e .env.local prisma migrate dev",
     "prisma:studio": "prisma studio",
+    "prisma:studio:local": "dotenv -e .env.local prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
@@ -79,6 +83,7 @@
     "@types/passport-spotify": "^2.0.4",
     "@types/passport-twitter": "^1.0.40",
     "@types/supertest": "^6.0.2",
+    "dotenv-cli": "^9.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
