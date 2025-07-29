@@ -46,7 +46,7 @@ A comprehensive price tracking application that monitors product prices from Ama
 - Scheduled jobs for automated tracking
 
 ### Frontend
-- Next.js 14 with TypeScript
+- Next.js 15 with TypeScript
 - Tailwind CSS for styling
 - Recharts for data visualization
 - Axios for API communication
