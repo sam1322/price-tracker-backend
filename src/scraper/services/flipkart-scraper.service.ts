@@ -11,129 +11,143 @@ export class FlipkartScraperService {
     constructor(private browserService: BrowserService) { }
 
     async search(query: string, limit: number = 100): Promise<ScraperResult> {
-        const browser = this.browserService.getBrowser();
-        const context = await browser.newContext({
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        });
-        const page = await context.newPage();
-
-        try {
-            const searchUrl = `${this.baseUrl}/search?q=${encodeURIComponent(query)}`;
-            await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
-
-            // Handle login popup if it appears
+        // const browser = this.browserService.getBrowser();
+        // const context = await browser.newContext({
+        //     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        // });
+        // const page = await context.newPage();
+        // const page = await this.browserService.getPage();
+        const searchPage = async (page: Page): Promise<ScraperResult> => {
             try {
-                await page.click('._2KpZ6l._2doB4z', { timeout: 3000 });
-            } catch (e) {
-                // Login popup might not appear
+                const searchUrl = `${this.baseUrl}/search?q=${encodeURIComponent(query)}`;
+                await page.goto(searchUrl, { waitUntil: 'domcontentloaded' });
+
+                // Handle login popup if it appears
+                try {
+                    await page.click('._2KpZ6l._2doB4z', { timeout: 3000 });
+                } catch (e) {
+                    // Login popup might not appear
+                }
+
+                // Wait for products to load
+                await page.waitForSelector('._75nlfW', { timeout: 10000 });
+
+                const products = await this.extractProducts(page, limit);
+                this.logger.log("flipkart products recieved", products.length)
+
+                // await page.screenshot({ path: `success-flipkart-${Date.now()}.png` });
+                this.logger.debug(`Flipkart scraping was success.`);
+                return {
+                    success: true,
+                    products,
+                    vendor: 'FLIPKART',
+                    searchQuery: query,
+                };
+            } catch (error) {
+                this.logger.error(`Error searching Flipkart: ${error.message}`);
+                // this.logger.error(`[Flipkart] Failed to scrape ${url}`, error.stack);
+                await page.screenshot({ path: `error-flipkart-${Date.now()}.png` });
+                // throw new Error(`Amazon scraping failed. A screenshot was saved.`);
+                return {
+                    success: false,
+                    products: [],
+                    vendor: 'FLIPKART',
+                    searchQuery: query,
+                    error: error.message,
+                };
+            } finally {
+                // if (page) {
+                //     await this.browserService.closePage(page);
+                // }
+                // await context.close();
             }
-
-            // Wait for products to load
-            await page.waitForSelector('._75nlfW', { timeout: 10000 });
-
-            const products = await this.extractProducts(page, limit);
-            this.logger.log("flipkart products recieved", products.length)
-
-            // await page.screenshot({ path: `success-flipkart-${Date.now()}.png` });
-            this.logger.debug(`Flikpart scraping success. A screenshot was saved.`);
-            return {
-                success: true,
-                products,
-                vendor: 'FLIPKART',
-                searchQuery: query,
-            };
-        } catch (error) {
-            this.logger.error(`Error searching Flipkart: ${error.message}`);
-            // this.logger.error(`[Flipkart] Failed to scrape ${url}`, error.stack);
-            await page.screenshot({ path: `error-flipkart-${Date.now()}.png` });
-            // throw new Error(`Amazon scraping failed. A screenshot was saved.`);
-            return {
-                success: false,
-                products: [],
-                vendor: 'FLIPKART',
-                searchQuery: query,
-                error: error.message,
-            };
-        } finally {
-            await context.close();
         }
+        return await this.browserService.usePage(searchPage)
+
     }
 
     async scrapeProduct(productUrl: string): Promise<ProductData | null> {
-        const browser = this.browserService.getBrowser();
-        const context = await browser.newContext({
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        });
-        const page = await context.newPage();
-
-        try {
-            await page.goto(productUrl, { waitUntil: 'domcontentloaded' });
-
-            // Handle login popup
+        // const browser = this.browserService.getBrowser();
+        // const context = await browser.newContext({
+        //     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        // });
+        // const page = await context.newPage();
+        // const page = await this.browserService.getPage();
+        const scrapePage = async (page: Page): Promise<ProductData | null> => {
             try {
-                await page.click('._2KpZ6l._2doB4z', { timeout: 3000 });
-            } catch (e) {
-                // Login popup might not appear
-            }
+                await page.goto(productUrl, { waitUntil: 'domcontentloaded' });
 
-            const productData = await page.evaluate(() => {
-                const getTextContent = (selector: string): string => {
-                    const element = document.querySelector(selector);
-                    return element?.textContent?.trim() || '';
-                };
+                // Handle login popup
+                try {
+                    await page.click('._2KpZ6l._2doB4z', { timeout: 3000 });
+                } catch (e) {
+                    // Login popup might not appear
+                }
 
-                const getPrice = (): number => {
-                    const priceText = getTextContent('.Nx9bqj.CxhGGd');
-                    if (priceText) {
-                        const price = parseFloat(priceText.replace(/[^0-9]/g, ''));
-                        return isNaN(price) ? 0 : price;
-                    }
-                    return 0;
-                };
+                const productData = await page.evaluate(() => {
+                    const getTextContent = (selector: string): string => {
+                        const element = document.querySelector(selector);
+                        return element?.textContent?.trim() || '';
+                    };
 
-                const getOriginalPrice = (): number => {
-                    const originalPriceText = getTextContent('.yRaY8j.A6\\+E6v');
-                    console.log(originalPriceText, "originalPrice")
-                    if (originalPriceText) {
-                        const price = parseFloat(originalPriceText.replace(/[^0-9]/g, ''));
-                        return isNaN(price) ? 0 : price;
-                    }
-                    return 0;
-                };
+                    const getPrice = (): number => {
+                        const priceText = getTextContent('.Nx9bqj.CxhGGd');
+                        if (priceText) {
+                            const price = parseFloat(priceText.replace(/[^0-9]/g, ''));
+                            return isNaN(price) ? 0 : price;
+                        }
+                        return 0;
+                    };
 
-                const getRating = (): number => {
-                    const ratingText = getTextContent('.XQDdHH');
-                    return ratingText ? parseFloat(ratingText) : 0;
-                };
+                    const getOriginalPrice = (): number => {
+                        const originalPriceText = getTextContent('.yRaY8j.A6\\+E6v');
+                        console.log(originalPriceText, "originalPrice")
+                        if (originalPriceText) {
+                            const price = parseFloat(originalPriceText.replace(/[^0-9]/g, ''));
+                            return isNaN(price) ? 0 : price;
+                        }
+                        return 0;
+                    };
 
-                const getProductId = (): string => {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    return urlParams.get('pid') || '';
-                };
+                    const getRating = (): number => {
+                        const ratingText = getTextContent('.XQDdHH');
+                        return ratingText ? parseFloat(ratingText) : 0;
+                    };
+
+                    const getProductId = (): string => {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        return urlParams.get('pid') || '';
+                    };
+
+                    return {
+                        title: getTextContent('.VU-ZEz'),
+                        price: getPrice(),
+                        originalPrice: getOriginalPrice(),
+                        currency: 'INR',
+                        imageUrl: document.querySelector('.DByuf4.IZexXJ.jLEJ7H')?.getAttribute('src') || '',
+                        availability: !getTextContent('._16FRp0').includes('Sold Out'), // TODO : fix later
+                        rating: getRating(),
+                        flipkartId: getProductId(),
+                    };
+                });
 
                 return {
-                    title: getTextContent('.VU-ZEz'),
-                    price: getPrice(),
-                    originalPrice: getOriginalPrice(),
-                    currency: 'INR',
-                    imageUrl: document.querySelector('.DByuf4.IZexXJ.jLEJ7H')?.getAttribute('src') || '',
-                    availability: !getTextContent('._16FRp0').includes('Sold Out'), // TODO : fix later
-                    rating: getRating(),
-                    flipkartId: getProductId(),
+                    ...productData,
+                    productUrl,
+                    vendor: 'FLIPKART',
                 };
-            });
-
-            return {
-                ...productData,
-                productUrl,
-                vendor: 'FLIPKART',
-            };
-        } catch (error) {
-            this.logger.error(`Error scraping Flipkart product: ${error.message}`);
-            return null;
-        } finally {
-            await context.close();
+            } catch (error) {
+                this.logger.error(`Error scraping Flipkart product: ${error.message}`);
+                return null;
+            } finally {
+                // if (page) {
+                //     await this.browserService.closePage(page);
+                // }
+                // await context.close();
+            }
         }
+        return await this.browserService.usePage(scrapePage)
+
     }
 
     private async extractProducts(page: Page, limit: number): Promise<ProductData[]> {

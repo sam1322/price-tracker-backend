@@ -1,0 +1,22 @@
+
+# docker-compose.dev.yml
+version: '3.8'
+
+services:
+  browser:
+    container_name: browserless-chrome
+    image: browserless/chrome:latest
+    ports:
+      - "3002:3000"
+    shm_size: '2gb'       # CRITICAL: Increase shared memory size
+    mem_limit: '3g'       # Optional but recommended: Give the container a 4GB memory limit
+    mem_reservation: '2g' # Optional but recommended: Reserve 2GB of memory for it
+    environment:
+      - DEBUG=browserless*
+      - KEEP_ALIVE=true
+      - MAX_CONCURRENT_SESSIONS=10
+      - PREBOOT_CHROME=true
+      - DEFAULT_LAUNCH_ARGS=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--no-first-run", "--no-zygote", "--single-process", "--disable-web-security"]
+
+      # - DEFAULT_LAUNCH_ARGS=["--disable-web-security", "--disable-features=IsolateOrigins", "--disable-site-isolation-trials"]
+      # - KEEP_ALIVE=true
