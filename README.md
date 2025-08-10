@@ -24,6 +24,9 @@
 # Price Tracker - Amazon & Flipkart
 
 A comprehensive price tracking application that monitors product prices from Amazon and Flipkart, sends alerts on price drops, and provides detailed analytics.
+
+🌐 Live Demo: [https://project.sam-tech.xyz/price-tracker](https://project.sam-tech.xyz/price-tracker)
+
 <img width="1902" height="1911" alt="Create-Next-App-07-24-2025_05_24_PM-1" src="https://github.com/user-attachments/assets/29a2372e-87e1-4d9e-8686-bdb533e3d9ba" />
 
 
