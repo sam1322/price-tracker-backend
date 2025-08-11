@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  caddy:
+    # Pin to a specific version of Caddy. Using the 'alpine' tag is great for a smaller image size.
+    image: caddy:2.8.4-alpine
+    container_name: caddy_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"   # For HTTP traffic and SSL challenges
+      - "443:443" # For secure HTTPS traffic
+    volumes:
+      # Mount your Caddyfile for configuration
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      # Persist SSL certificates and other data
+      - caddy_data:/data
+    networks:
+      # Attach Caddy to the same shared network as your app
+      - caddy_network
+
+networks:
+  caddy_network:
+    # This tells Docker Compose the network was created manually
+    external: true
+
+volumes:
+  caddy_data:

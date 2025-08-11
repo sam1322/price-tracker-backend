@@ -5,3 +5,5 @@ dist
 .env.local
 dist
 generated
+.gitignore
+.pnpm-store
