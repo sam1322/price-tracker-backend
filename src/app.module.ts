@@ -23,6 +23,7 @@ import { TrackerModule } from './tracker/tracker.module';
 // import { PrismaModule } from './modules/prisma/prisma.module';
 // import { ScraperModule } from './modules/scraper/scraper.module';
 // import { TrackerModule } from './modules/tracker/tracker.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TrackerModule } from './tracker/tracker.module';
     BrowserModule,
     ScraperModule,
     TrackerModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
