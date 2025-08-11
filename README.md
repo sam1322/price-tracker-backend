@@ -27,6 +27,8 @@ A comprehensive price tracking application that monitors product prices from Ama
 
 🌐 Live Demo: [https://project.sam-tech.xyz/price-tracker](https://project.sam-tech.xyz/price-tracker)
 
+Frontend Repo: [https://github.com/sam1322/price-tracker-frontend](https://github.com/sam1322/price-tracker-frontend)
+
 <img width="1902" height="1911" alt="Create-Next-App-07-24-2025_05_24_PM-1" src="https://github.com/user-attachments/assets/29a2372e-87e1-4d9e-8686-bdb533e3d9ba" />
 
 
