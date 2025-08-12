@@ -5,8 +5,7 @@ import { HealthController } from './health.controller';
 
 @Module({
     imports: [TerminusModule,
-            PrismaModule,
-        
+        PrismaModule,
     ],
     controllers: [HealthController]
 })
