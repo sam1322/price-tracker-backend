@@ -13,14 +13,16 @@
 // }
 // bootstrap();
 
-
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import *  as compression from 'compression';
+// import * as compression from 'compression';
+import compression from 'compression';
+
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import * as cookieParser from "cookie-parser"
+// import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
