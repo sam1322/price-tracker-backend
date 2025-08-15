@@ -70,7 +70,7 @@ export class AzureService implements OnModuleInit {
       // Return the readable stream
       return downloadBlockBlobResponse.readableStreamBody;
     } catch (error) {
-      if (error.statusCode === 404) {
+      if (error?.statusCode === 404) {
         throw new NotFoundException('File not found');
       }
       throw new InternalServerErrorException(

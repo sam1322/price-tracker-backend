@@ -40,6 +40,7 @@ export class AzureController {
   ) {
     const fileStream = await this.azureService.downloadFile(filename);
     res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+    // @ts-expect-error fix the type error later
     fileStream.pipe(res);
   }
 
