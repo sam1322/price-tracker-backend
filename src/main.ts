@@ -23,10 +23,10 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 // import * as cookieParser from 'cookie-parser';
 import cookieParser from 'cookie-parser';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   // Security
   app.use(helmet());
 
@@ -51,6 +51,17 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  // Add Kafka microservice to the same app
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: { brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'] },
+      consumer: { groupId: 'video-workers' },
+    },
+  });
+
+  await app.startAllMicroservices();
 
   // Swagger Documentation
   const config = new DocumentBuilder()

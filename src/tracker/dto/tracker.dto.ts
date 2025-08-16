@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsUrl } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ProductData } from 'src/scraper/interfaces/scraper.interface';
 
 export class CreateTrackedItemDto {

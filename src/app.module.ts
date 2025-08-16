@@ -14,6 +14,7 @@ import { TrackerModule } from './tracker/tracker.module';
 import { HealthModule } from './health/health.module';
 import { VideoModule } from './video/video.module';
 import { AzureModule } from './azure/azure.module';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
   imports: [
@@ -29,6 +30,21 @@ import { AzureModule } from './azure/azure.module';
         },
       ],
     }),
+    // ClientsModule.register([
+    //   {
+    //     name: 'VIDEO_SERVICE', // Injection token
+    //     transport: Transport.KAFKA,
+    //     options: {
+    //       client: {
+    //         brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
+    //       },
+    //       // consumer: {
+    //       //   // A unique consumer group ID for this client instance
+    //       //   groupId: 'api-gateway-client',
+    //       // },
+    //     },
+    //   },
+    // ]),
     UsersModule,
     AuthModule,
     InstagramModule,
@@ -39,6 +55,7 @@ import { AzureModule } from './azure/azure.module';
     HealthModule,
     VideoModule,
     AzureModule,
+    KafkaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
