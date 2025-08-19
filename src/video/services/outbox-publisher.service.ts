@@ -1,10 +1,9 @@
 // outbox-publisher.service.ts
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { Producer } from 'kafkajs';
+import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { Interval } from '@nestjs/schedule';
 import { EVENT_TO_TOPIC } from '../../constants/kafka-topic-mapper';
-import { KafkaService } from './kafka.service';
+import { KafkaService } from '../../kafka/kafka.service';
 
 @Injectable()
 export class OutboxPublisherService {
@@ -18,6 +17,7 @@ export class OutboxPublisherService {
   @Interval(5000) // Run every second
   async publishPendingEvents() {
     const maxRetries = 5;
+    this.logger.log('publish outbox events');
     const events = await this.prisma.outboxEvent.findMany({
       where: { processed: false, retryCount: { lt: maxRetries } },
       orderBy: { createdAt: 'asc' },
@@ -30,14 +30,12 @@ export class OutboxPublisherService {
       try {
         const kafkaTopic = EVENT_TO_TOPIC[event.eventType]; // 'video.jobs.created.v1'
 
-        await this.producer.send({
+        this.kafkaService.emitEvent({
           topic: kafkaTopic,
-          messages: [
-            {
-              key: event.jobId,
-              value: JSON.stringify(event.payload),
-            },
-          ],
+          payload: {
+            key: event.jobId,
+            value: JSON.stringify(event.payload),
+          },
         });
 
         await this.prisma.outboxEvent.update({
