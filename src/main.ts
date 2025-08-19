@@ -64,15 +64,15 @@ async function bootstrap() {
   await app.startAllMicroservices();
 
   // Swagger Documentation
-  const config = new DocumentBuilder()
-    .setTitle('Price Tracker API')
-    .setDescription('API for tracking prices from Amazon and Flipkart')
-    .setVersion('1.0')
-    .addTag('tracker')
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  // const config = new DocumentBuilder()
+  //   .setTitle('Price Tracker API')
+  //   .setDescription('API for tracking prices from Amazon and Flipkart')
+  //   .setVersion('1.0')
+  //   .addTag('tracker')
+  //   .build();
+  //
+  // const document = SwaggerModule.createDocument(app, config);
+  // SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT || 3001;
   await app.listen(port);

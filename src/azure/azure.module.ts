@@ -5,5 +5,6 @@ import { AzureService } from './azure.service';
 @Module({
   controllers: [AzureController],
   providers: [AzureService],
+  exports: [AzureService],
 })
 export class AzureModule {}
