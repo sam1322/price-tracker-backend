@@ -2,11 +2,13 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { KafkaService } from './kafka.service';
 import { VideoJobCreated } from './dto/kafka-message.interface';
+import { KafkaTopics } from '../constants/kafka-topic-mapper';
 
 @Controller('kafka')
 export class KafkaController {
   constructor(private readonly kafkaService: KafkaService) {}
-  @EventPattern('video.job.created')
+
+  @EventPattern(KafkaTopics.VIDEO_JOB_FAILED.topic)
   handleVideoJobCreated(@Payload() message: VideoJobCreated) {
     // The message payload is already parsed from JSON
     const { jobId, prompt, timestamp } = message;
