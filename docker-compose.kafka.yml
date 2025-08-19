@@ -1,0 +1,66 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      # Port for clients outside of docker (your NestJS app)
+      - "9092:9092"
+    environment:
+
+      CLUSTER_ID: '1-3MEVD7S5-_fnLtJlbmwQ'
+      # --- KRaft settings ---
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+
+      # --- Listener settings ---
+      KAFKA_LISTENERS: 'BROKER://:29092,CONTROLLER://:9093,EXTERNAL://:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'BROKER://kafka:29092,EXTERNAL://localhost:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'BROKER'
+
+      # --- Other settings ---
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+    networks:
+      - kafka-network
+    restart: unless-stopped
+    mem_limit: '1g'
+    mem_reservation: '512m'
+    volumes:
+      - kafka-data:/var/lib/kafka/data  # Persist data
+
+
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    container_name: redpanda-console
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_BROKERS: "kafka:29092"
+    networks:
+      - kafka-network
+#      - caddy_network  # If you want Caddy to reverse proxy to it
+    restart: unless-stopped
+    mem_limit: '256m'
+    mem_reservation: '128m'
+
+
+networks:
+  kafka-network:
+    driver: bridge
+#  caddy_network:
+#    external: true  # Assuming you want to connect to your existing Caddy network
+
+volumes:
+  kafka-data:
+    driver: local

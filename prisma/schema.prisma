@@ -23,15 +23,16 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   emailVerified DateTime?
   image         String?
   password      String? // For email/password auth
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   accounts      Account[]
+  videoJobs     VideoJob[] // 👈 Add this relation
 }
 
 model Account {
@@ -136,4 +137,77 @@ enum ScrapeStatus {
   SUCCESS
   PARTIAL_SUCCESS
   FAILED
+}
+
+// -------------------------------------- AI Video Generator -----------------------------------------------------------------
+model VideoJob {
+  id         String    @id @default(cuid())
+  userId     String // 👈 Add userId field
+  prompt     String
+  status     JobStatus @default(PENDING)
+  scriptText String?
+  videoUrl   String?
+  error      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade) // 👈 Add user relation
+  assets       JobAsset[]
+  outboxEvents OutboxEvent[]
+
+  @@index([userId]) // 👈 Add index for efficient user queries
+  @@index([userId, status]) // 👈 Composite index for filtering by user and status
+}
+
+model JobAsset {
+  id        String    @id @default(cuid())
+  jobId     String
+  type      AssetType
+  url       String
+  duration  Int? // Common to both audio/video
+  metadata  Json? // Type-specific fields
+  createdAt DateTime  @default(now())
+
+  job VideoJob @relation(fields: [jobId], references: [id])
+
+  @@index([jobId, type]) // Optimize queries by job and type
+}
+
+enum AssetType {
+  VIDEO
+  AUDIO
+  IMAGE
+}
+
+model OutboxEvent {
+  id         String    @id @default(cuid())
+  jobId      String
+  eventType  EventType
+  payload    Json
+  processed  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  retryCount Int       @default(0)
+  // maxRetries Int      @default(3)
+
+  job VideoJob @relation(fields: [jobId], references: [id])
+}
+
+enum JobStatus {
+  PENDING
+  GENERATING_SCRIPT
+  SCRIPT_GENERATED
+  GENERATING_ASSETS
+  ASSETS_GENERATED
+  RENDERING_VIDEO
+  COMPLETED
+  FAILED
+}
+
+enum EventType {
+  VIDEO_JOB_CREATED // Will store 'VIDEO_JOB_CREATED' in DB
+  VIDEO_SCRIPT_GENERATED
+  VIDEO_ASSETS_GENERATED
+  VIDEO_JOB_PROCESSING
+  VIDEO_JOB_COMPLETED
+  VIDEO_JOB_FAILED
 }
