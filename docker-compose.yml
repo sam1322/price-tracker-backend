@@ -1,93 +1,10 @@
-  # version: '3.8'
-
-  # services:
-  #   api:
-  #     build:
-  #       context: .
-  #       # Pass DATABASE_URL as a build-time secret
-  #       secrets:
-  #         - database_url
-  #     ports:
-  #       - "3001:3001"
-  #     # Also load the .env file for runtime
-  #     env_file:
-  #       - .env
-
-  # # Define the secret source
-  # secrets:
-  #   database_url:
-  #     file: .env
-
-# version: '3.8'
-
-# services:
-#   api:
-#     build:
-#       context: .
-#       secrets:
-#         - database_url
-#     ports:
-#       - "3001:3001"
-#     env_file:
-#       - .env
-#     environment:
-#       - BROWSER_WS_ENDPOINT=ws://browser:3002
-#     depends_on:
-#       - browser
-#     networks:
-#       - app-network
-
-#   browser:
-#     image: browserless/chrome:latest
-#     ports:
-#       - "3002:3000"  # Optional: expose for debugging
-#     environment:
-#       - MAX_CONCURRENT_SESSIONS=10
-#       - MAX_QUEUE_LENGTH=20
-#       - PREBOOT_CHROME=true
-#       - KEEP_ALIVE=true
-#       - CHROME_REFRESH_TIME=3600000
-#       - DEFAULT_BLOCK_ADS=true
-#       - DEFAULT_HEADLESS=true
-#       - DEFAULT_LAUNCH_ARGS=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--no-first-run", "--no-zygote", "--single-process", "--disable-web-security"]
-
-#     networks:
-#       - app-network
-
-# networks:
-#   app-network:
-#     driver: bridge
-
-# secrets:
-#   database_url:
-#     file: .env
-
-# docker-compose.dev.yml
-# version: '3.8'
-
-# services:
-#   browser:
-#     image: browserless/chrome:latest
-#     ports:
-#       - "3002:3000"
-#     shm_size: '2gb'       # CRITICAL: Increase shared memory size
-#     mem_limit: '3g'       # Optional but recommended: Give the container a 4GB memory limit
-#     mem_reservation: '2g' # Optional but recommended: Reserve 2GB of memory for it
-#     environment:
-#       - DEBUG=browserless*
-#       - KEEP_ALIVE=true
-#       - MAX_CONCURRENT_SESSIONS=10
-#       - PREBOOT_CHROME=true
-#       - DEFAULT_LAUNCH_ARGS=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--no-first-run", "--no-zygote", "--single-process", "--disable-web-security"]
-
-#       # - DEFAULT_LAUNCH_ARGS=["--disable-web-security", "--disable-features=IsolateOrigins", "--disable-site-isolation-trials"]
-#       # - KEEP_ALIVE=true
-
-# version: '3.8'
 
 services:
   app:
     build: .
+    # image: sam1322/projects:price-tracker-backend
+    # image: sam1322/projects:price-tracker-backend-arm64
+    container_name: nestjs-backend
     ports:
       - "3001:3001"
     env_file: ".env" # Tells Docker Compose to load variables from the .env file1
@@ -96,11 +13,11 @@ services:
       - BROWSER_WS_ENDPOINT=ws://browserless:3000
     depends_on:
       - browserless
-    # depends_on:
-    #   browserless:
-    #     condition: service_healthy
+      - kafka
     networks:
       - app-network
+      - kafka-network
+      - caddy_network   # For talking to the 'caddy' container
     restart: unless-stopped
 
   browserless:
@@ -115,27 +32,77 @@ services:
       - KEEP_ALIVE=true
       - MAX_CONCURRENT_SESSIONS=10
       - PREBOOT_CHROME=true
-      - DEFAULT_LAUNCH_ARGS=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--no-first-run", "--no-zygote", "--single-process", "--disable-web-security"]
-      # API-focused configuration
-      # - FUNCTION_ENABLE_INCOMINGMESSAGES=true
-      # - FUNCTION_DISABLE_AUTO_SET_DOWNLOAD_BEHAVIOR=false
-      # - DEFAULT_STEALTH=true
-      # - CONNECTION_TIMEOUT=60000
-      # - MAX_CONCURRENT_SESSIONS=10
-      # - MAX_QUEUE_LENGTH=10
-      # - PREBOOT_CHROME=true
-      # - KEEP_ALIVE=true
-      # - DEFAULT_LAUNCH_ARGS=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--no-first-run", "--no-zygote", "--single-process", "--disable-web-security"]
+     # - DEFAULT_LAUNCH_ARGS=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu", "--no-first-run", "--no-zygote", "--single-process", "--disable-web-security"]
 
     networks:
       - app-network
     restart: unless-stopped
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:3000/pressure"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      # Port for clients outside of docker (your NestJS app)
+      - "9092:9092"
+    environment:
+
+      CLUSTER_ID: '1-3MEVD7S5-_fnLtJlbmwQ'
+      # --- KRaft settings ---
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+
+      # --- Listener settings ---
+      KAFKA_LISTENERS: 'BROKER://:29092,CONTROLLER://:9093,EXTERNAL://:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'BROKER://kafka:29092,EXTERNAL://localhost:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'BROKER:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'BROKER'
+
+      # --- Other settings ---
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+    networks:
+      - kafka-network
+    restart: unless-stopped
+    mem_limit: '1g'
+    mem_reservation: '512m'
+    volumes:
+      - kafka-data:/var/lib/kafka/data  # Persist data
+
+
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    container_name: redpanda-console
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_BROKERS: "kafka:29092"
+    networks:
+      - kafka-network
+  #      - caddy_network  # If you want Caddy to reverse proxy to it
+    restart: unless-stopped
+    mem_limit: '256m'
+    mem_reservation: '128m'
+
+
 
 networks:
+  caddy_network:
+     external: true
+
   app-network:
     driver: bridge
+
+  kafka-network:
+    driver: bridge
+
+
+volumes:
+  kafka-data:
+    driver: local

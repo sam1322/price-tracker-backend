@@ -29,6 +29,14 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String? // For email/password auth
+
+
+  // Guest user fields
+  isGuest       Boolean    @default(false)
+  guestId       String?    @unique @default(cuid())
+  fingerprint   String?    @db.Text
+  deviceInfo    Json?      // Store additional device info
+
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   accounts      Account[]

@@ -4,13 +4,14 @@
 // export class AuthService {}
 
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -18,7 +19,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   // For Local (Email/Password) Strategy
   async validateUser(email: string, pass: string): Promise<any> {
@@ -127,5 +128,97 @@ export class AuthService {
     });
 
     return newUser;
+  }
+
+  // auth.service.ts
+
+  async createGuestUser(fingerprint: string) {
+    // Check if guest with this fingerprint already exists
+    const existingGuest = await this.prisma.user.findFirst({
+      where: {
+        fingerprint,
+        isGuest: true
+      },
+    });
+
+    if (existingGuest) {
+      return existingGuest;
+    }
+
+    // Create new guest user
+    const guestUser = await this.prisma.user.create({
+      data: {
+        isGuest: true,
+        fingerprint,
+        // guestId: undefined, // Let Prisma generate it with @default(cuid())
+        name: `Guest User ${Math.random().toString(36).substr(2, 4)}`,
+      },
+    });
+
+    return guestUser;
+  }
+
+  async convertGuestToUser(guestId: string, createUserDto: CreateUserDto) {
+    const { email, password, name } = createUserDto;
+
+    // Check if email is already taken
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    // Find guest user
+    const guestUser = await this.prisma.user.findUnique({
+      where: { guestId },
+    });
+
+    if (!guestUser || !guestUser.isGuest) {
+      throw new BadRequestException('Guest user not found');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Convert guest to regular user
+    const convertedUser = await this.prisma.user.update({
+      where: { id: guestUser.id },
+      data: {
+        email,
+        password: hashedPassword,
+        name: name || guestUser.name,
+        isGuest: false,
+        // emailVerified: new Date(), // Mark as verified or handle separately
+      },
+    });
+
+    // Remove password from response
+    const { password: _, ...result } = convertedUser;
+    return result;
+  }
+
+  async findGuestByFingerprint(fingerprint: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        fingerprint,
+        isGuest: true,
+      },
+    });
+  }
+
+  async findUserById(id: string) {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        isGuest: true,
+        guestId: true,
+        createdAt: true,
+      },
+    });
   }
 }

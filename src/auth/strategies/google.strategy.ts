@@ -13,6 +13,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       //   callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/auth/google/callback',
       scope: ['email', 'profile'],
       // passReqToCallback: true, // Add if you need the request object
+      // Enable state parameter
+      // state: true,
     });
   }
 
@@ -31,11 +33,31 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         throw new UnauthorizedException('Could not process user from provider.');
       }
 
+
       return user; // ✅ On success, return the user
+      // done(null, user);
+
     } catch (err) {
       // ❌ On failure, throw an exception
       console.log("error", err)
       throw new UnauthorizedException('Failed to validate user.', err.message);
     }
   }
+
+  // Override the authenticate method to handle state
+  // authenticate(req: any, options?: any) {
+  //   // Extract redirect URL from query and add it to state
+  //   if (req.query.redirect && !options?.state) {
+  //     const stateData = {
+  //       redirectUrl: req.query.redirect,
+  //       timestamp: Date.now(),
+  //     };
+  //     options = {
+  //       ...options,
+  //       state: Buffer.from(JSON.stringify(stateData)).toString('base64'),
+  //     };
+  //   }
+
+  //   return super.authenticate(req, options);
+  // }
 }
