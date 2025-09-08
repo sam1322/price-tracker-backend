@@ -30,6 +30,8 @@ It provides APIs, background jobs, and scalable infrastructure for both projects
 
 Frontend Repo: [https://github.com/sam1322/price-tracker-frontend](https://github.com/sam1322/price-tracker-frontend)
 
+![Backend Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.sam-tech.xyz%2Fhealth&label=backend%20status)
+
 ---
 
 ## 🚀 Projects
