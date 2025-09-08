@@ -37,8 +37,6 @@ Frontend Repo: [https://github.com/sam1322/price-tracker-frontend](https://githu
 ### 1. Price Tracker – Amazon & Flipkart
 🌐 Live Demo: [https://project.sam-tech.xyz/price-tracker](https://project.sam-tech.xyz/price-tracker)
 
-Frontend Repo: [https://github.com/sam1322/price-tracker-frontend](https://github.com/sam1322/price-tracker-frontend)
-
 <img width="700" height="500" alt="Create-Next-App-07-24-2025_05_24_PM-2" src="https://github.com/user-attachments/assets/2664af36-090e-46cb-990b-7af924053293" />
 
 
@@ -56,8 +54,6 @@ A system that scrapes product data, stores price histories, and triggers alerts 
 
 ### 2. AI Video Generator
 🌐 Live Demo: [https://project.sam-tech.xyz/ai-video-gen](https://project.sam-tech.xyz/ai-video-gen)
-
-Frontend Repo: [https://github.com/sam1322/price-tracker-frontend](https://github.com/sam1322/price-tracker-frontend)
 
 [<img width="900" height="500" alt="Create-Next-App-08-22-2025_12_28_PM" src="https://github.com/user-attachments/assets/508aae14-2a1d-4dbf-bcfa-4ca99626e994" />
 ](https://youtu.be/CzLBYULWHT8?si=lE2rYyVxGq3x9SSd)
