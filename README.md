@@ -20,99 +20,111 @@
 </p>
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+ 
+---
 
-# Price Tracker - Amazon & Flipkart
+# Backend – Price Tracker & AI Video Generator
 
-A comprehensive price tracking application that monitors product prices from Amazon and Flipkart, sends alerts on price drops, and provides detailed analytics.
+This backend powers two full-stack applications — a **Price Tracker** for Amazon & Flipkart and an **AI Video Generator** platform.
+It provides APIs, background jobs, and scalable infrastructure for both projects.
 
+Frontend Repo: [https://github.com/sam1322/price-tracker-frontend](https://github.com/sam1322/price-tracker-frontend)
+
+---
+
+## 🚀 Projects
+
+### 1. Price Tracker – Amazon & Flipkart
 🌐 Live Demo: [https://project.sam-tech.xyz/price-tracker](https://project.sam-tech.xyz/price-tracker)
 
 Frontend Repo: [https://github.com/sam1322/price-tracker-frontend](https://github.com/sam1322/price-tracker-frontend)
 
-<img width="1902" height="1911" alt="Create-Next-App-07-24-2025_05_24_PM-1" src="https://github.com/user-attachments/assets/29a2372e-87e1-4d9e-8686-bdb533e3d9ba" />
+<img width="700" height="500" alt="Create-Next-App-07-24-2025_05_24_PM-2" src="https://github.com/user-attachments/assets/2664af36-090e-46cb-990b-7af924053293" />
 
 
-## Features
+A system that scrapes product data, stores price histories, and triggers alerts when user-defined conditions are met.
 
-- 🔍 **Product Search**: Search products across Amazon and Flipkart simultaneously
-- 📊 **Price Comparison**: Compare prices between vendors
-- 📈 **Price History**: Track price changes over time with interactive charts
-- 🔔 **Price Alerts**: Get notified when prices drop below your target
-- ⏰ **Automated Tracking**: Prices are checked every 6 hours automatically
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
-- 📊 **Analytics Dashboard**: View statistics and trends
+**Backend Highlights**
 
-## Tech Stack
+* 🔍 Playwright-based scraping for Amazon & Flipkart
+* 📈 PostgreSQL + Prisma for historical price tracking
+* ⏰ Cron jobs for 6-hour automated updates
+* 🔔 Price alert service with notification triggers
+* 📊 REST APIs powering analytics & comparison features
 
-### Backend
-- NestJS with TypeScript
-- Prisma ORM with PostgreSQL
-- Playwright for web scraping
-- Scheduled jobs for automated tracking
+---
 
-### Frontend
-- Next.js 15 with TypeScript
-- Tailwind CSS for styling
-- Recharts for data visualization
-- Axios for API communication
+### 2. AI Video Generator
+🌐 Live Demo: [https://project.sam-tech.xyz/ai-video-gen](https://project.sam-tech.xyz/ai-video-gen)
 
-## Prerequisites
+Frontend Repo: [https://github.com/sam1322/price-tracker-frontend](https://github.com/sam1322/price-tracker-frontend)
 
-- Node.js 18+
-- PostgreSQL 15+
-- npm or yarn
+[<img width="900" height="500" alt="Create-Next-App-08-22-2025_12_28_PM" src="https://github.com/user-attachments/assets/508aae14-2a1d-4dbf-bcfa-4ca99626e994" />
+](https://youtu.be/CzLBYULWHT8?si=lE2rYyVxGq3x9SSd)
 
 
+A distributed backend for generating short-form videos from natural prompts using AI and resilient pipelines.
 
+**Backend Highlights**
 
-## Description
+* ✨ Gemini API integration for AI-driven scripts & scenes
+* ⚡ Kafka workers with transactional outbox for fault tolerance
+* 🎬 FFmpeg for video composition and rendering
+* ☁️ Azure Blob Storage for scalable media storage
+* 📡 Async job handling for smooth real-time frontend interaction
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## 🛠️ Tech Stack
 
-```bash
-$ npm install
-```
+* **Framework**: NestJS with TypeScript
+* **Database**: PostgreSQL + Prisma ORM
+* **Scraping**: Playwright (Price Tracker)
+* **Processing**: Kafka, FFmpeg, Gemini APIs (AI Video Generator)
+* **Storage**: Azure Blob Storage
+* **Scheduling**: Cron jobs for automated workflows
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## 📦 Prerequisites
 
-# watch mode
-$ npm run start:dev
+* Node.js 18+
+* PostgreSQL 15+
+* npm or yarn
 
-# production mode
-$ npm run start:prod
-```
+---
 
-## Run tests
+## 🔧 Setup
 
 ```bash
-# unit tests
-$ npm run test
+# Clone repo
+git clone https://github.com/sam1322/price-tracker-backend.git
+cd price-tracker-backend
 
-# e2e tests
-$ npm run test:e2e
+# Install dependencies
+pnpm install  # or use npm or yarn or bun whatever you like 
 
-# test coverage
-$ npm run test:cov
+# Setup environment
+cp .env.example .env # for prod env
+cp .env.example .env.local # for dev env
+
+# Run migrations
+pnpm prisma:migrate:local # for generating tables in local db
+pnpm prisma:migrate # for generating tables in prod db
+
+# Generate primsa client
+pnpm prisma:generate
+
+# Open DB table
+pnpm prisma:studio:local # for opening local database
+pnpm prisma:studio # for opening prod database
+
+# Start development server
+pnpm run start:dev:local #for running in local env
+pnpm run start:dev # for running in prod or dev env
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
 ## Resources
 
